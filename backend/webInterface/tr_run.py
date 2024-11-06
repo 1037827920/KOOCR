@@ -43,7 +43,7 @@ class TrRun(tornado.web.RequestHandler):
         '''
         start_time = time.time()
         MAX_SIZE = 1600
-
+        
         img_up = self.request.files.get('file', None)
         img_b64 = self.get_argument('img', None)
         compress_size = self.get_argument('compress', None)
@@ -62,8 +62,8 @@ class TrRun(tornado.web.RequestHandler):
             img = Image.open(BytesIO(raw_image))
         else:
             self.set_status(400)
-            logger.error(json.dumps({'code': 400, 'msg': '没有传入参数'}, cls=NpEncoder))
-            self.finish(json.dumps({'code': 400, 'msg': '没有传入参数'}, cls=NpEncoder))
+            logger.error(json.dumps({'code': 400, 'msg': 'No incoming argument'}, cls=NpEncoder))
+            self.finish(json.dumps({'code': 400, 'msg': 'No incoming argument'}, cls=NpEncoder))
             return
 
         # 旋转图片

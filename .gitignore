@@ -133,3 +133,6 @@ dmypy.json
 .vscode
 
 requirements.txt
+
+backend/dist/
+backend/logs/
