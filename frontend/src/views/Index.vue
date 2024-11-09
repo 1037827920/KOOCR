@@ -184,7 +184,7 @@ export default defineComponent({
       this.is_compress = !this.is_compress
       console.log('is_compress: ', this.is_compress)
     },
-    // 点击识别按钮的回调函数
+    // 点击识别icon的回调函数，处理单个图片的识别
     handleSingleUpload(index) {
       console.log('<handleSingleUpload>, index: ', index)
       // 如果正在识别中，则提示用户
@@ -207,18 +207,19 @@ export default defineComponent({
       }
 
       // 选择索引为index的图片
-      console.log('file_list: ', this.file_list)
       const file = this.file_list[index]
-      console.log('file: ', file)
+      // console.log('file: ', file)
 
       // 创建一个 FormData 对象
       const formData = new FormData()
       formData.append('file', file)
       formData.append('compress', this.is_compress ? this.compress_size : 0)
+      formData.append('is_draw', '1'); // 添加是否绘制检测框的参数
+
       // 日志输出formData
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value)
-      }
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(`${key}:`, value)
+      // }
 
       // 设置状态
       this.is_ocring = true
@@ -236,31 +237,44 @@ export default defineComponent({
         data: formData // 请求数据
       })
         .then(response => {
-          console.log('response: ', response)
-          console.log('response.data.data.img_detected: ', response.data.data.img_detected)
-          this.detected_list[index] = response.data.data.img_detected
+          // 获取识别结果
+          const result = response.data.data.results[0]
+          // console.log('result: ', result)
 
-          console.log('response.data.data.raw_out: ', response.data.data.raw_out)
-          const raw_data = response.data.data.raw_out
-          var new_ocr_raw = ''
-          var new_ocr_text = ''
-          raw_data.forEach((item, i) => {
-            new_ocr_raw += JSON.stringify(item) + '\r'
-            if (i < raw_data.length - 1) {
-              const nextLineHeight = raw_data[i + 1][0][1]
-              if (Math.abs(item[0][1] - nextLineHeight) < item[0][3] / 2) {
-                new_ocr_text += item[1] + ' '
+          // 处理img_detected
+          if (result.img_detected) {
+            // console.log('result.img_detected: ', result.img_detected)
+            this.detected_list[index] = result.img_detected
+          } else {
+            this.detected_list[index] = ''
+          }
+
+          // 处理raw_out
+          if (result.raw_out) {
+            // console.log('result.raw_out: ', result.raw_out)
+            let new_ocr_raw = ''
+            let new_ocr_text = ''
+            result.raw_out.forEach((item, i) => {
+              new_ocr_raw += JSON.stringify(item) + '\r'
+              if (i < result.raw_out.length - 1) {
+                const nextLineHeight = result.raw_out[i + 1][0][1]
+                if (Math.abs(item[0][1] - nextLineHeight) < item[0][3] / 2) {
+                  new_ocr_text += item[1] + ' '
+                } else {
+                  new_ocr_text += item[1] + '\r'
+                }
               } else {
-                new_ocr_text += item[1] + '\r'
+                new_ocr_text += item[1]
               }
-            } else {
-              new_ocr_text += item[1]
-            }
-          })
-          console.log('new_ocr_raw: ', new_ocr_raw)
-          console.log('new_ocr_text: ', new_ocr_text)
-          this.ocr_raw[index] = new_ocr_raw
-          this.ocr_text[index] = new_ocr_text
+            })
+            // console.log('new_ocr_raw: ', new_ocr_raw)
+            // console.log('new_ocr_text: ', new_ocr_text)
+            this.ocr_raw[index] = new_ocr_raw
+            this.ocr_text[index] = new_ocr_text
+          } else {
+            this.ocr_raw[index] = ''
+            this.ocr_text[index] = ''
+          }
 
           this.uploading = false
           this.is_ocring = false
@@ -274,7 +288,8 @@ export default defineComponent({
         .catch(error => {
           console.log('error: ', error)
           this.is_ocring = false
-          const errorInfo = error.response?.msg || error.message
+          this.uploading = false;
+          const errorInfo = error.response?.data?.msg || error.message
           this.$message.error({
             id: 'myError',
             content: '错误：' + errorInfo,
@@ -282,8 +297,10 @@ export default defineComponent({
           })
         })
     },
+    // 点击开始识别按钮的回调函数，处理所有图片的识别
     handleUpload() {
       console.log('<handleUpload>')
+      // 如果正在识别中，则提示用户
       if (this.is_ocring) {
         this.$message.warning({
           id: 'myWarning',
@@ -292,6 +309,7 @@ export default defineComponent({
         })
         return
       }
+      // 如果没有选择图片，则提示用户
       if (this.file_list.length < 1) {
         this.$message.warning({
           id: 'myWarning',
@@ -300,21 +318,44 @@ export default defineComponent({
         })
         return
       }
-      console.log('file_list: ', this.file_list)
+
+      // 过滤出未被识别的图片及其索引
+      const unprocessedFiles = []
+      const unprocessedIndices = []
+      this.file_list.forEach((file, index) => {
+        if (!this.detected_list[index]) {
+          unprocessedFiles.push(file)
+          unprocessedIndices.push(index)
+        }
+      })
+      // 如果所有图片都已经被识别过了，则提示用户
+      if (unprocessedFiles.length === 0) {
+        this.$message.warning({
+          id: 'myWarning',
+          content: '所有图片都已经识别过了, 无需再次提交',
+          closable: true,
+        })
+        return
+      }
+      // console.log('未识别的文件列表: ', unprocessedFiles)
+      // console.log('对应的索引: ', unprocessedIndices)
+
 
       // 创建一个 FormData 对象
       const formData = new FormData()
-      // 遍历文件列表，将文件加入到 FormData 中
-      this.file_list.forEach(file => {
+      // 遍历未识别的文件列表，将文件加入到 FormData 中
+      unprocessedFiles.forEach(file => {
         formData.append('file', file)
       })
       // 将是否压缩图片的状态加入到 FormData 中
       formData.append('compress', this.is_compress ? this.compress_size : 0)
+      // 添加是否绘制检测框的参数
+      formData.append('is_draw', '1')
 
       // 日志输出：遍历 FormData
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value)
-      }
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(`${key}:`, value)
+      // }
 
       // 设置状态
       this.is_ocring = true
@@ -332,23 +373,43 @@ export default defineComponent({
         data: formData // 请求数据
       })
         .then(response => {
-          console.log('response: ', response)
-          this.detected_list = response.data.data.img_detected
-          this.ocr_raw = ''
-          this.ocr_text = ''
+          const response_data = response.data.data
+          const results = response_data.results || []
+          // console.log('results: ', results)
 
-          const raw_data = response.data.data.raw_out
-          raw_data.forEach((item, i) => {
-            this.ocrRaw += JSON.stringify(item) + '\r'
-            if (i < raw_data.length - 1) {
-              const nextLineHeight = raw_data[i + 1][0][1]
-              if (Math.abs(item[0][1] - nextLineHeight) < item[0][3] / 2) {
-                this.ocrText += item[1] + ' '
-              } else {
-                this.ocrText += item[1] + '\r'
-              }
+          // 遍历每个结果并更新对应的数据列表
+          results.forEach((result, idx) => {
+            const originalIndex = unprocessedIndices[idx]
+
+            // 处理img_detected
+            if (result.img_detected) {
+              this.detected_list[originalIndex] = result.img_detected
             } else {
-              this.ocrText += item[1]
+              this.detected_list[originalIndex] = ''
+            }
+
+            // 处理raw_out
+            if (result.raw_out) {
+              let new_ocr_raw = ''
+              let new_ocr_text = ''
+              result.raw_out.forEach((item, i) => {
+                new_ocr_raw += JSON.stringify(item) + '\r'
+                if (i < result.raw_out.length - 1) {
+                  const nextLineHeight = result.raw_out[i + 1][0][1]
+                  if (Math.abs(item[0][1] - nextLineHeight) < item[0][3] / 2) {
+                    new_ocr_text += item[1] + ' '
+                  } else {
+                    new_ocr_text += item[1] + '\r'
+                  }
+                } else {
+                  new_ocr_text += item[1]
+                }
+              })
+              this.ocr_raw[originalIndex] = new_ocr_raw
+              this.ocr_text[originalIndex] = new_ocr_text
+            } else {
+              this.ocr_raw[originalIndex] = ''
+              this.ocr_text[originalIndex] = ''
             }
           })
 
@@ -364,7 +425,7 @@ export default defineComponent({
         .catch(error => {
           console.log('error: ', error)
           this.is_ocring = false
-          const errorInfo = error.response?.msg || error.message
+          const errorInfo = error.response?.data?.msg || error.message
           this.$message.error({
             id: 'myError',
             content: '错误：' + errorInfo,
