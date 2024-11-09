@@ -134,3 +134,4 @@ dmypy.json
 
 backend/dist/
 backend/logs/
+backend/uploads/

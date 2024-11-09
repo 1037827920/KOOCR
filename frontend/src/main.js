@@ -15,6 +15,7 @@ import axios from 'axios'
 import Vue3HighlightJS from 'vue3-highlightjs'
 // 导入字节ui库
 import ArcoVue from '@arco-design/web-vue';
+import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import '@arco-design/web-vue/dist/arco.css';
 
 const app = createApp(App)
@@ -30,7 +31,8 @@ app.use(Row)
 app.use(Col)
 app.use(Divider)
 app.use(Upload)
-app.use(ArcoVue);
+app.use(ArcoVue)
+app.use(ArcoVueIcon)
 
 app.config.productionTip = false
 

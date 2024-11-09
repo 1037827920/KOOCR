@@ -45,7 +45,13 @@ npm run serve
 npm run build
 ```
 
-5. 运行后端和前端
+5. 在后端添加uploads文件夹
+
+```bash
+mkdir backend/uploads
+```
+
+6. 运行后端和前端
 
 ```bash
 python backend/main.py

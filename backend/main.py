@@ -16,7 +16,7 @@ sys.path.append(BASE_PATH)
 from backend.tools.get_host_ip import host_ip
 from backend.tools import manage_running_platform
 from backend.tools import log
-
+from backend.webInterface.upload_handler import FileUploadHandler
 
 logger = logging.getLogger(log.LOGGER_ROOT_NAME + '.' + __name__)
 
@@ -33,6 +33,7 @@ def make_app():
 
     return tornado.web.Application([
         (r"/api/tr-run/", tr_run.TrRun),
+        (r"/api/upload", FileUploadHandler),  # 文件上传接口
         (r"/", tr_index.Index),
         (r"/(.*)", StaticFileHandler,
          {"path": os.path.join(current_path, "dist"), "default_filename": "index.html"}),
