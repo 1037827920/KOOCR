@@ -33,52 +33,41 @@
             <a-modal v-if="show_preview_modal" :visible="show_preview_modal" @ok="handleOk" @cancel="handelCancel"
               :footer="false" width="80%" :mask="true" :hide-title="true">
               <!-- header区域 -->
-              <a-space direction="horizontal" :size="250" class="expand-modal" fill>
-                <!-- 将header分为两部分 -->
-                <template #split>
-                  <a-divider direction="vertical" :size="5" />
-                </template>
+              <div class="expand-modal-header">
                 <div class="text-large">原始图片</div>
+                <!-- 将header分为两部分 -->
+                <a-divider direction="vertical" :size="5" />
                 <div class="text-large">识别结果</div>
-              </a-space>
+              </div>
 
               <!-- 分别header和content -->
               <a-divider direction="horizontal" :size="4" />
 
               <!-- content区域 -->
-              <a-space direction="horizontal" :size="85" class="expand-modal" fill>
-                <!-- 将content分为两部分 -->
-                <template #split>
-                  <a-divider direction="vertical" :size="5" type="dotted" />
-                </template>
+
+              <div class="expand-modal-content">
                 <!-- 左侧区域 -->
-                <div class="drawer-left">
+                <div class="modal-left">
                   <a-image :src="preview_image_list[current_preview_index]" alt="原始图片" width="400" height="300"
                     fit="fill" />
                 </div>
+                <!-- 将content分为两部分 -->
+
+                <a-divider direction="vertical" :size="5" type="dashed" />
 
                 <!-- 右侧区域 -->
-                <div class="drawer-right">
+                <div class="modal-right">
                   <a-divider orientation="center">识别后的图片</a-divider>
-                  <a-image :src="detected_list[current_preview_index]" alt="识别后的图片" width="400" height="300"
-                    fit="fill"></a-image>
+                  <div class="right-image-container">
+                    <a-image :src="detected_list[current_preview_index]" alt="识别后的图片" width="400" height="300"
+                      fit="fill"></a-image>
+                  </div>
                   <a-divider orientation="center">原始结果</a-divider>
-                  <CodeHighlight :txt="ocr_raw[current_preview_index]" />
+                  <CodeHighlight class="code-highlight" :txt="ocr_raw[current_preview_index]" />
                   <a-divider orientation="center">识别的文字</a-divider>
-                  <CodeHighlight :txt="ocr_text[current_preview_index]" />
-                  <!-- <CodeHighlight txt="[[313.5,315,347,87.71428680419922,0],OpenGL" /> -->
-                  <!-- <CodeHighlight txt="OpenGL JO01 
-吏用glad和
-
-glfw创建  
-
-歹 
-31
-32 glClearCo 
-33
-34" /> -->
+                  <CodeHighlight class="code-highlight" :txt="ocr_text[current_preview_index]" />
                 </div>
-              </a-space>
+              </div>
             </a-modal>
           </template>
         </a-image>
@@ -544,10 +533,60 @@ export default defineComponent({
   background: rgba(100, 83, 83, 0.5);
 }
 
-.expand-modal {
+.expand-modal-header {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 5px;
+}
+
+.text-large {
+  width: 50%;
+  font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.expand-modal-content {
+  display: flex;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.modal-left {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-right {
+  width: 50%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding-right: 15px;
+}
+
+.right-image-container {
+  display: flex;
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  margin: 10px 0;
+  /* 根据需要调整上下间距 */
+}
+
+.code-highlight {
+  /* 代码块之间的垂直间隔 */
+  margin-bottom: 5px;
+  /* 为滚动条留出空间 */
+  padding-right: 7px;
+  box-sizing: border-box;
 }
 
 .operating-area {
@@ -594,9 +633,5 @@ export default defineComponent({
 
 .operating-area a-button {
   width: 100%;
-}
-
-.text-large {
-  font-size: 15px;
 }
 </style>
