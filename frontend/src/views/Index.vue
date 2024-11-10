@@ -2,8 +2,12 @@
   <div class="img-ocr-page">
     <!-- 上传区域 -->
     <div class="upload-box">
+      <!-- 
+      - multiple: 支持多文件上传
+      - directory: 支持上传文件夹（需要浏览器支持）
+      -->
       <a-upload draggable name="file" action="/api/upload" :show-file-list="false" @change="handleChange"
-        accept=".jpg, .jpeg, .png, .gif, .ico" />
+        accept=".jpg, .jpeg, .png, .gif, .ico" multiple directory/>
     </div>
 
     <!-- 预览图片区域 -->
