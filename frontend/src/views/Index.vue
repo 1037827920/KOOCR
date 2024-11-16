@@ -171,6 +171,8 @@ export default defineComponent({
       this.file_list.splice(index, 1)
       // 删除对应的预览图片
       this.preview_image_list.splice(index, 1)
+      // 删除对应已经识别的图片
+      this.detected_list.splice(index, 1)
     },
     changeCompressButton() {
       console.log('<changeCompressButton>')
@@ -232,7 +234,7 @@ export default defineComponent({
         .then(response => {
           // 获取识别结果
           const result = response.data.data.results[0]
-          // console.log('result: ', result)
+          console.log('result: ', result)
 
           // 处理img_detected
           if (result.img_detected) {
