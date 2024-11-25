@@ -56,3 +56,17 @@ mkdir backend/uploads
 ```bash
 python backend/main.py
 ```
+
+## 使用docker构建镜像并在容器中运行
+
+1. 构建镜像：
+
+```bash
+docker build -t koocr-app .
+```
+
+2. 运行docker容器
+
+```bash
+docker run -p 8089:8089 --name koocr-container koocr-app
+```
