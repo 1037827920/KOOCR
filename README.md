@@ -70,3 +70,7 @@ docker build -t koocr-app .
 ```bash
 docker run -p 8089:8089 --name koocr-container koocr-app
 ```
+
+## 参考
+
+https://github.com/alisen39/TrWebOCR
