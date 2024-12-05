@@ -1,3 +1,21 @@
+
+# 引言
+
+**功能：** 一个用于图片OCR识别的web应用
+
+**技术栈：**
+
+- 语言: python(后端)、Vue3+JavaScript(前端)
+- JavaScript运行时环境: Nodejs
+- 包管理: pip、npm
+- 代码托管/团队协作: git/github
+- 部署工具: docker
+
+**效果图：**
+
+![展示图](./assets/Snipaste_2024-12-05_21-51-20.png)
+
+
 # KOOCR
 
 1. 安装依赖(ubuntu22)
